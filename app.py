@@ -5,8 +5,8 @@ import replicate
 app = Flask(__name__)
 app.secret_key = 'arkas_studio_secret_key_change_in_production'
 
-# Clé API Replicate configurée directement
-os.environ["REPLICATE_API_TOKEN"] = "r8_Wh4cnyZbU3BInQZuasX4ZCaWtr8ZEX91eJViI"
+# Nouvelle clé API Replicate configurée avec passage au client Replicate
+REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "r8_NUfyp24uyTMwv3DYKQi230sHlrf5dqe1BbSxj")
 
 @app.route('/')
 def home():
@@ -41,21 +41,21 @@ def generate_music():
     if not prompt:
         return jsonify({'error': 'Le prompt est obligatoire'}), 400
 
-    # Fusion du style musical et de la description
     full_prompt = f"{genre} style: {prompt}"
 
     try:
-        # Appel du modèle MusicGen de Meta sur Replicate
-        output = replicate.run(
+        # Initialisation explicite du client avec la nouvelle clé API
+        client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+        
+        output = client.run(
             "meta/musicgen:b05b1d261cd7346307a304eca54837c3cd42ea530b1ac53e137260d799a7f0d0",
             input={
                 "prompt": full_prompt,
                 "model_version": "stereo-large",
-                "duration": 15  # Durée de la séquence musicale en secondes
+                "duration": 15
             }
         )
         
-        # Retourne l'URL du fichier audio généré
         return jsonify({'audio_url': output})
 
     except Exception as e:
