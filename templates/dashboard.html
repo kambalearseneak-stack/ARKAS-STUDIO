@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio de Génération - ARKAS STUDIO</title>
+    <!-- Police Google Fonts Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url("{{ url_for('static', filename='images/arkastudio.jpg') }}") no-repeat center center/cover attachment;
+            position: relative;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 1;
+        }
+
+        /* Barre de navigation */
+        nav {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #ffffff, #a1c4fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Zone de contenu principal */
+        main {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .studio-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .studio-card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff, #a1c4fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .studio-card p {
+            color: #d1d5db;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+            color: #d1d5db;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, select:focus {
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        select option {
+            background: #111827;
+            color: #fff;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+            margin-top: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Lecteur audio de prévisualisation */
+        .player-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none; /* Affiché via JS lors de la génération */
+        }
+
+        .player-section h3 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        audio {
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">ARKAS STUDIO</div>
+        <a href="{{ url_for('home') }}" class="btn-logout">Déconnexion</a>
+    </nav>
+
+    <main>
+        <div class="studio-card">
+            <h2>Créer un Morceau</h2>
+            <p>Décrivez l'ambiance, le style ou le thème de la musique que vous souhaitez générer.</p>
+
+            <form id="generate-form">
+                <div class="form-group">
+                    <label for="prompt">Description de la musique (Prompt)</label>
+                    <textarea id="prompt" name="prompt" required placeholder="Ex: Un beat Afro-Beat dynamique avec des synthétiseurs modernes et une mélodie entraînante..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre Musical</label>
+                    <select id="genre" name="genre">
+                        <option value="afrobeats">Afrobeat / Amapiano</option>
+                        <option value="pop">Pop / Electro</option>
+                        <option value="hiphop">Hip-Hop / Trap</option>
+                        <option value="cinematic">Cinématique / Epic</option>
+                        <option value="lofi">Lofi / Chill</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-generate">Générer la Musique 🎵</button>
+            </form>
+
+            <div class="player-section" id="player-section">
+                <h3>Votre morceau généré :</h3>
+                <audio id="audio-player" controls>
+                    <source src="" type="audio/mpeg">
+                    Votre navigateur ne supporte pas l'élément audio.
+                </audio>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
