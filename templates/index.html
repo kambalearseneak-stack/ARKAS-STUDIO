@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARKAS STUDIO</title>
-    <!-- Police Google Fonts moderne -->
+    <!-- Police Google Fonts Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* Superposition d'un masque sombre et lisible sur l'image de fond */
+        /* Superposition sombre et floutée pour rendre le fond clair tout en gardant le texte lisible */
         body::before {
             content: '';
             position: absolute;
@@ -41,7 +41,7 @@
             z-index: 1;
         }
 
-        /* Carte principale en verre dépoli (Glassmorphism) */
+        /* Container en verre dépoli (Glassmorphism) */
         .container {
             position: relative;
             z-index: 2;
@@ -88,6 +88,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
+            display: block;
         }
 
         .btn-primary {
@@ -120,11 +121,10 @@
         <p class="subtitle">Création & Génération Musicale par IA</p>
         
         <div class="btn-group">
-            <a href="#" class="btn btn-primary">Commencer gratuitement</a>
-            <a href="#" class="btn btn-secondary">Se connecter</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Commencer gratuitement</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Se connecter</a>
         </div>
     </div>
 
 </body>
-  </html>
-  
+</html>
