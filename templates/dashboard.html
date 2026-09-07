@@ -26,6 +26,7 @@
             flex-direction: column;
         }
 
+        /* Masque sombre avec flou en arrière-plan */
         body::before {
             content: '';
             position: absolute;
@@ -45,7 +46,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 2rem;
+            padding: 1.2rem 2rem;
             background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -158,11 +159,18 @@
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
             margin-top: 1rem;
-            transition: transform 0.3s;
+            transition: all 0.3s;
         }
 
         .btn-generate:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         /* Lecteur audio de prévisualisation */
@@ -170,17 +178,19 @@
             margin-top: 2rem;
             padding-top: 1.5rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: none; /* Affiché via JS lors de la génération */
+            display: none; /* Affiché via JavaScript lors de la génération */
         }
 
         .player-section h3 {
             font-size: 1rem;
             margin-bottom: 0.8rem;
+            color: #a1c4fd;
         }
 
         audio {
             width: 100%;
             border-radius: 8px;
+            outline: none;
         }
     </style>
 </head>
@@ -205,15 +215,15 @@
                 <div class="form-group">
                     <label for="genre">Genre Musical</label>
                     <select id="genre" name="genre">
-                        <option value="afrobeats">Afrobeat / Amapiano</option>
-                        <option value="pop">Pop / Electro</option>
-                        <option value="hiphop">Hip-Hop / Trap</option>
-                        <option value="cinematic">Cinématique / Epic</option>
-                        <option value="lofi">Lofi / Chill</option>
+                        <option value="Afrobeat / Amapiano">Afrobeat / Amapiano</option>
+                        <option value="Pop / Electro">Pop / Electro</option>
+                        <option value="Hip-Hop / Trap">Hip-Hop / Trap</option>
+                        <option value="Cinématique / Epic">Cinématique / Epic</option>
+                        <option value="Lofi / Chill">Lofi / Chill</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-generate">Générer la Musique 🎵</button>
+                <button type="submit" id="btn-submit" class="btn-generate">Générer la Musique 🎵</button>
             </form>
 
             <div class="player-section" id="player-section">
@@ -225,6 +235,45 @@
             </div>
         </div>
     </main>
+
+    <script>
+        document.getElementById('generate-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const prompt = document.getElementById('prompt').value;
+            const genre = document.getElementById('genre').value;
+            const submitBtn = document.getElementById('btn-submit');
+            const playerSection = document.getElementById('player-section');
+            const audioPlayer = document.getElementById('audio-player');
+
+            // Mise à jour de l'état du bouton pendant la génération
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Génération en cours par l'IA... ⏳";
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, genre: genre })
+                });
+
+                const data = await response.json();
+
+                if (data.audio_url) {
+                    audioPlayer.src = data.audio_url;
+                    playerSection.style.display = 'block';
+                    audioPlayer.play();
+                } else {
+                    alert("Erreur: " + (data.error || "Impossible de générer le morceau."));
+                }
+            } catch (err) {
+                alert("Erreur lors de la connexion au serveur.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Génération de la Musique 🎵";
+            }
+        });
+    </script>
 
 </body>
 </html>
